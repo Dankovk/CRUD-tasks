@@ -1,0 +1,29 @@
+{
+  "name": "awesomic-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "bun@1.1.28",
+  "workspaces": [
+    "test-app",
+    "api"
+  ],
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "scripts": {
+    "dev:web": "cd test-app && bun run dev",
+    "dev:api": "cd api && bun run dev",
+    "build:web": "cd test-app && bun run build",
+    "build:api": "cd api && bun run build",
+    "start:web": "cd test-app && bun run start",
+    "start:api": "cd api && bun run start",
+    "db:generate": "cd api && bun run db:generate",
+    "db:migrate": "cd api && bun run db:migrate",
+    "db:studio": "cd api && bun run db:studio",
+    "db:reset": "cd api && bun run db:reset",
+    "dev": "cd test-app && bun run dev",
+    "start": "cd test-app && bun run start && cd api && bun run start"
+  }
+}
+
+
