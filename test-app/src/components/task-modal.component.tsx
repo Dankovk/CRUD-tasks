@@ -74,6 +74,8 @@ export function TaskModal({ mode, open, onOpenChange, values, onChange, dueDate,
     defaultValues: { title: values.title, description: values.description, status: values.status, priority: values.priority, date: undefined, time: "" },
   });
 
+  const handleFormSubmit = () => onSubmit({ values, dueIso: date ? combineLocalDateAndTime(date, time) : null });
+
   useEffect(() => {
     if (open) {
       form.reset({ title: values.title, description: values.description, status: values.status, priority: values.priority, date: undefined, time: "" });
@@ -97,92 +99,94 @@ export function TaskModal({ mode, open, onOpenChange, values, onChange, dueDate,
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{mode === "create" ? "New Task" : "Edit Task"}</DialogTitle>
-          
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="task-title">Title</Label>
-            <Input id="task-title" className="w-full" {...form.register("title")} onChange={(e) => { form.register("title").onChange?.(e); onChange({ ...values, title: e.target.value }); }} />
-            {form.formState.errors.title && <div className="text-destructive text-xs">{form.formState.errors.title.message as string}</div>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="task-description">Description</Label>
-            <Input id="task-description" className="w-full" {...form.register("description")} onChange={(e) => { form.register("description").onChange?.(e); onChange({ ...values, description: e.target.value }); }} />
-            {form.formState.errors.description && <div className="text-destructive text-xs">{form.formState.errors.description.message as string}</div>}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+          <DialogHeader>
+            <DialogTitle>{mode === "create" ? "New Task" : "Edit Task"}</DialogTitle>
+            
+          </DialogHeader>
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Status</Label>
-              <Select value={values.status} onValueChange={(v: TaskFormValues["status"]) => { onChange({ ...values, status: v }); form.setValue("status", v, { shouldValidate: true }); }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in_progress">In progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="task-title">Title</Label>
+              <Input id="task-title" className="w-full" {...form.register("title")} onChange={(e) => { form.register("title").onChange?.(e); onChange({ ...values, title: e.target.value }); }} />
+              {form.formState.errors.title && <div className="text-destructive text-xs">{form.formState.errors.title.message as string}</div>}
             </div>
             <div className="space-y-2">
-              <Label>Priority</Label>
-              <Select value={values.priority} onValueChange={(v: TaskFormValues["priority"]) => { onChange({ ...values, priority: v }); form.setValue("priority", v, { shouldValidate: true }); }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="task-description">Description</Label>
+              <Input id="task-description" className="w-full" {...form.register("description")} onChange={(e) => { form.register("description").onChange?.(e); onChange({ ...values, description: e.target.value }); }} />
+              {form.formState.errors.description && <div className="text-destructive text-xs">{form.formState.errors.description.message as string}</div>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="task-due">Due date</Label>
-              <div className="flex flex-col gap-2 min-w-0">
-                <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" id="task-due" className="justify-between w-full">
-                      {date ? date.toLocaleDateString() : "Select date"}
-                      <CalendarIcon />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={date} captionLayout="dropdown" onSelect={(d) => { setDate(d ?? undefined); form.setValue("date", d, { shouldValidate: true }); setDateOpen(false); }} />
-                  </PopoverContent>
-                </Popover>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={values.status} onValueChange={(v: TaskFormValues["status"]) => { onChange({ ...values, status: v }); form.setValue("status", v, { shouldValidate: true }); }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="task-due-time">Time</Label>
-              <div className="relative">
-                <Input
-                  id="task-due-time"
-                  type="time"
-                  step={60}
-                  placeholder="--:--"
-                  value={time}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setTime(e.target.value); form.setValue("time", e.target.value, { shouldValidate: true }); }}
-                  className="w-full pr-9 appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                />
-                <ClockIcon className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={values.priority} onValueChange={(v: TaskFormValues["priority"]) => { onChange({ ...values, priority: v }); form.setValue("priority", v, { shouldValidate: true }); }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              {(form.formState.errors.date || form.formState.errors.time) && (
-                <div className="text-destructive text-xs">
-                  {(form.formState.errors.date?.message as string) || (form.formState.errors.time?.message as string)}
+              <div className="space-y-2">
+                <Label htmlFor="task-due">Due date</Label>
+                <div className="flex flex-col gap-2 min-w-0">
+                  <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" id="task-due" className="justify-between w-full">
+                        {date ? date.toLocaleDateString() : "Select date"}
+                        <CalendarIcon />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={date} captionLayout="dropdown" onSelect={(d) => { setDate(d ?? undefined); form.setValue("date", d, { shouldValidate: true }); setDateOpen(false); }} />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-due-time">Time</Label>
+                <div className="relative">
+                  <Input
+                    id="task-due-time"
+                    type="time"
+                    step={60}
+                    placeholder="--:--"
+                    value={time}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setTime(e.target.value); form.setValue("time", e.target.value, { shouldValidate: true }); }}
+                    className="w-full pr-9 appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                  <ClockIcon className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                {(form.formState.errors.date || form.formState.errors.time) && (
+                  <div className="text-destructive text-xs">
+                    {(form.formState.errors.date?.message as string) || (form.formState.errors.time?.message as string)}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <StatefulButton onClick={() => form.handleSubmit(() => onSubmit({ values, dueIso: date ? combineLocalDateAndTime(date, time) : null }))()} disabled={!form.formState.isValid} aria-label="Save task">Save</StatefulButton>
-        </DialogFooter>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">Cancel</Button>
+            </DialogClose>
+            <StatefulButton type="submit" disabled={!form.formState.isValid} aria-label="Save task">Save</StatefulButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

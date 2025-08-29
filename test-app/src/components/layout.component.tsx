@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -8,7 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {children}
       <div className="fixed bottom-4 right-4 z-40">
         {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-        {require("@/components/theme-toggle").ThemeToggle()}
+        <ThemeToggle />
       </div>
     </div>
   );
