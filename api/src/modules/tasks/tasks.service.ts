@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, count, desc, eq, ilike } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, inArray } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { tasks, type Task } from '../../db/schema';
 
@@ -45,17 +45,13 @@ export class TasksService {
     }
 
     const where = and(
-      status && status.length === 1 ? eq(tasks.status, status[0] as any) : undefined,
-      priority && priority.length === 1 ? eq(tasks.priority, priority[0] as any) : undefined,
+      status && status.length ? inArray(tasks.status, status as any[]) : undefined,
+      priority && priority.length ? inArray(tasks.priority, priority as any[]) : undefined,
       q ? ilike(tasks.title, `%${q}%`) : undefined,
     );
 
-    const dataRaw = await db.select().from(tasks).where(where).orderBy(orderBy);
-    return dataRaw.filter((t: Task) => {
-      const statusOk = Array.isArray(status) && status.length ? status.includes(t.status as any) : true;
-      const priorityOk = Array.isArray(priority) && priority.length ? priority.includes(t.priority as any) : true;
-      return statusOk && priorityOk;
-    });
+    const data = await db.select().from(tasks).where(where).orderBy(orderBy);
+    return data;
   }
 
   async getById(id: number) {
@@ -99,31 +95,36 @@ export class TasksService {
   }
 
   async stats() {
-    const totalTasks = (await db.select({ c: count() }).from(tasks))[0].c as number;
-    const byStatusRows = await Promise.all([
-      db.select({ c: count() }).from(tasks).where(eq(tasks.status, 'pending' as any)),
-      db.select({ c: count() }).from(tasks).where(eq(tasks.status, 'in_progress' as any)),
-      db.select({ c: count() }).from(tasks).where(eq(tasks.status, 'completed' as any)),
-    ]);
-    const byPriorityRows = await Promise.all([
-      db.select({ c: count() }).from(tasks).where(eq(tasks.priority, 'low' as any)),
-      db.select({ c: count() }).from(tasks).where(eq(tasks.priority, 'medium' as any)),
-      db.select({ c: count() }).from(tasks).where(eq(tasks.priority, 'high' as any)),
-    ]);
+    const totalTasksRow = await db.select({ c: count() }).from(tasks);
+    const totalTasks = Number(totalTasksRow[0]?.c ?? 0);
 
-    return {
-      totalTasks,
-      byStatus: {
-        pending: (byStatusRows[0][0]?.c as number) ?? 0,
-        in_progress: (byStatusRows[1][0]?.c as number) ?? 0,
-        completed: (byStatusRows[2][0]?.c as number) ?? 0,
-      },
-      byPriority: {
-        low: (byPriorityRows[0][0]?.c as number) ?? 0,
-        medium: (byPriorityRows[1][0]?.c as number) ?? 0,
-        high: (byPriorityRows[2][0]?.c as number) ?? 0,
-      },
+    const byStatusGrouped = await db
+      .select({ status: tasks.status, c: count() })
+      .from(tasks)
+      .groupBy(tasks.status);
+
+    const byPriorityGrouped = await db
+      .select({ priority: tasks.priority, c: count() })
+      .from(tasks)
+      .groupBy(tasks.priority);
+
+    const byStatus: Record<'pending' | 'in_progress' | 'completed', number> = {
+      pending: 0,
+      in_progress: 0,
+      completed: 0,
     };
+    for (const row of byStatusGrouped) {
+      const key = row.status as 'pending' | 'in_progress' | 'completed';
+      byStatus[key] = Number(row.c) || 0;
+    }
+
+    const byPriority: Record<'low' | 'medium' | 'high', number> = { low: 0, medium: 0, high: 0 };
+    for (const row of byPriorityGrouped) {
+      const key = row.priority as 'low' | 'medium' | 'high';
+      byPriority[key] = Number(row.c) || 0;
+    }
+
+    return { totalTasks, byStatus, byPriority };
   }
 }
 

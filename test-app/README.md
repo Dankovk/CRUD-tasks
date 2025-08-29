@@ -1,4 +1,4 @@
-Task Management System – Next.js + Drizzle + Postgres
+Task Management System – Next.js + TanStack Query + Bun
 
 ### Overview
 
@@ -6,11 +6,11 @@ Card-based tasks app with full modal editing (Notion-like), frontend validation,
 
 - Next.js App Router (TypeScript)
 - Bun as the package runner
-- Drizzle ORM + Postgres
 - TanStack Query for data-fetching/caching ([docs](https://tanstack.com/query/latest))
 - shadcn/ui components
 - Zod + React Hook Form for client-side validation
 - Sonner for toasts
+ - Motion for micro-interactions
 
 ### Key Features
 
@@ -25,25 +25,15 @@ Card-based tasks app with full modal editing (Notion-like), frontend validation,
 
 ## Getting Started
 
-1) Copy env and set `DATABASE_URL`:
+1) (Optional) Configure API base URL in `.env.local`:
 ```bash
-cp .env.example .env
-# e.g. postgres://postgres:postgres@localhost:5432/tasks
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
+If not set in development, the app falls back to `http://localhost:4000`.
 
-2) Start Postgres (optional via Docker):
+2) Install dependencies and run dev:
 ```bash
-docker compose up -d
-```
-
-3) Generate and apply migrations (Drizzle):
-```bash
-bun run db:generate
-bun run db:migrate
-```
-
-4) Run the dev server:
-```bash
+bun install
 bun run dev
 ```
 
@@ -53,7 +43,8 @@ Scripts:
 ```bash
 bun run lint      # biome check
 bun run format    # biome format --write
-bun run db:studio # drizzle-kit studio
+bun run build     # next build (production)
+bun run start     # next start (production)
 ```
 
 ---
@@ -72,8 +63,8 @@ and are mounted once from `src/app/layout.tsx`.
 
 API fetchers and React Query hooks:
 ```
-src/api/tasks.ts     # typed fetchers
-src/queries/tasks.ts # useTasks / useTaskStats / useCreateTask / useUpdateTask / useDeleteTask
+src/lib/api/tasks.ts     # typed fetchers
+src/lib/queries/tasks.ts # useTasks / useTaskStats / useCreateTask / useUpdateTask / useDeleteTask
 ```
 
 - Queries only depend on server-backed filters (status, priority). Free-text search `q` is applied client-side to avoid refetch flicker.
@@ -97,22 +88,23 @@ src/components/ui/stateful-button.tsx    # animated action button (optional)
 - Header badges toggle independently; active badges have a ring.
 - Server accepts comma-separated values; client additionally filters locally for a snappy experience.
 
-Examples:
+Examples (against the backend):
 ```
-/api/tasks?status=pending,in_progress
-/api/tasks?priority=medium,high&q=report
+{API_BASE}/tasks?status=pending,in_progress
+{API_BASE}/tasks?priority=medium,high&q=report
 ```
 
 ---
 
-## API Endpoints
+## Backend Endpoints
 
-- `GET    /api/tasks` – list tasks (filters: `q`, `status`, `priority`, each can be comma-separated)
-- `POST   /api/tasks` – create task
-- `GET    /api/tasks/:id` – get task by id
-- `PUT    /api/tasks/:id` – update task
-- `DELETE /api/tasks/:id` – delete task
-- `GET    /api/tasks/stats` – totals by status/priority
+- Base: `${NEXT_PUBLIC_API_URL}` (dev fallback: `http://localhost:4000`)
+- `GET    /tasks` – list tasks (filters: `q`, `status`, `priority`, each can be comma-separated)
+- `POST   /tasks` – create task
+- `GET    /tasks/:id` – get task by id
+- `PUT    /tasks/:id` – update task
+- `DELETE /tasks/:id` – delete task
+- `GET    /tasks/stats` – totals by status/priority
 
 ### Validation
 
@@ -124,7 +116,8 @@ Examples:
 ## Development Notes
 
 - This project assumes Bun. Use `bun add`, `bun run` etc.
-- Drizzle migrations are generated from `src/server/db/schema.ts` and stored under `drizzle/`.
+- The API is a separate NestJS service located at `../api`. Start it on port 4000 or set `NEXT_PUBLIC_API_URL` to point to it.
+- Dev server uses Turbopack; production build uses standard `next build` for Bun compatibility.
 - UI components are from shadcn/ui with a small design pass for dashboard badges.
 - Notifications use Sonner; configured in the global providers.
 
@@ -133,12 +126,8 @@ Examples:
 ## Troubleshooting
 
 - No tasks appear:
-  - Make sure Postgres is running and `DATABASE_URL` is correct.
-  - Run `bun run db:migrate` after changing the schema.
-  - Check Network tab and API responses.
-
-- Filters feel slow:
-  - Client-side `q` filtering is instant; status/priority changes refetch, but list stays visible thanks to placeholder data.
+  - Ensure the API is running and reachable at `${NEXT_PUBLIC_API_URL}` (or `http://localhost:4000` in dev by default).
+  - Check browser Network tab and API responses.
 
 ---
 

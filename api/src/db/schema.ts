@@ -20,6 +20,8 @@ export const tasks = pgTable(
     statusIdx: index('idx_tasks_status').on(table.status),
     priorityIdx: index('idx_tasks_priority').on(table.priority),
     dueDateIdx: index('idx_tasks_due_date').on(table.dueDate),
+    statusCreatedAtIdx: index('idx_tasks_status_created_at').on(table.status, table.createdAt),
+    priorityCreatedAtIdx: index('idx_tasks_priority_created_at').on(table.priority, table.createdAt),
   })
 );
 
