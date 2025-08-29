@@ -1,15 +1,15 @@
-FROM oven/bun:1 as deps
+FROM oven/bun:1 AS deps
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+COPY package.json ./
+RUN bun install
 
-FROM oven/bun:1 as builder
+FROM oven/bun:1 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bun run db:generate && bun run build
 
-FROM oven/bun:1 as runner
+FROM oven/bun:1 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/dist ./dist

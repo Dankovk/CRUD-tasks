@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type TaskDto, type TaskPriority, type TaskStatus, type StatsDto } from "@/api/tasks";
+import { api, type TaskDto, type TaskPriority, type TaskStatus, type StatsDto } from "@/lib/api/tasks";
 
 const keys = {
   // only status/priority affect server query; q is filtered on the client to avoid refetch flicker

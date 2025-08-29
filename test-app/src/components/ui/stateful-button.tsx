@@ -4,13 +4,15 @@ import React from "react";
 import { motion, useAnimate } from "motion/react";
 import { buttonVariants } from "@/components/ui/button";
 
-interface StatefulButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type StatefulButtonProps = Omit<
+  React.ComponentProps<typeof motion.button>,
+  "ref"
+> & {
   className?: string;
   children: React.ReactNode;
   variant?: React.ComponentProps<typeof motion.button>["className"];
-}
+};
 
-// A drop-in animated button that matches the default shadcn button styles
 export const Button = ({ className, children, ...props }: StatefulButtonProps) => {
   const [scope, animate] = useAnimate();
 
@@ -48,7 +50,6 @@ export const Button = ({ className, children, ...props }: StatefulButtonProps) =
 
   const { onClick, ...buttonProps } = props;
 
-  // @ts-expect-error motion/react ships its own types; suppress if not resolved by tooling
   return (
     <motion.button
       layout

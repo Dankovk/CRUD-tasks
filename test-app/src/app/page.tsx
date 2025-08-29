@@ -8,7 +8,7 @@ import { TaskCard } from "@/components/task-card.component";
 import type { TaskCardTask } from "@/components/task-card.component";
 import { TaskModal, type TaskFormValues } from "@/components/task-modal.component";
 import { toast } from "sonner";
-import { useCreateTask, useDeleteTask, useTaskStats, useTasks, useUpdateTask } from "@/queries/tasks";
+import { useCreateTask, useDeleteTask, useTaskStats, useTasks, useUpdateTask } from "@/lib/queries/tasks";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button as StatefulButton } from "@/components/ui/stateful-button";
 

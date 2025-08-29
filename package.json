@@ -21,9 +21,7 @@
     "db:migrate": "cd api && bun run db:migrate",
     "db:studio": "cd api && bun run db:studio",
     "db:reset": "cd api && bun run db:reset",
-    "dev": "cd test-app && bun run dev",
-    "start": "cd test-app && bun run start && cd api && bun run start"
+    "dev": "cd test-app && bun run dev & cd api && bun run dev",
+    "start": "cd test-app && bun run start & cd api && bun run start"
   }
 }
-
-
