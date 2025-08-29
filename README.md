@@ -1,4 +1,4 @@
-## Awesomic Test Task — Next.js + NestJS + Bun + Postgres
+##  Next.js + NestJS + Bun + Postgres
 
 A small monorepo demonstrating a tasks CRUD app:
 
