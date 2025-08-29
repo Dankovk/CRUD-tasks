@@ -124,8 +124,8 @@ API package (api): `dev`, `build`, `start`, `db:generate`, `db:migrate`, `db:stu
 - `test-app/` — Next.js 15 app (React 19). Key bits:
   - `src/lib/api/` — API client (fetch wrappers)
   - `src/lib/queries/` — TanStack Query hooks
-  - `src/components/` — UI components (e.g., animated stateful button using Motion)
-  - Uses Turbopack in dev; production build uses standard `next build` (no Turbopack) for Bun compatibility
+  - `src/components/` — UI components 
+
 
 - `api/` — NestJS app (Fastify) with Drizzle ORM
   - `src/modules/tasks/` — CRUD routes and service
@@ -173,7 +173,6 @@ curl -X POST http://localhost:4000/tasks \
 
 - Data fetching and caching with TanStack Query
 - Filtering by `status`/`priority` (server), free-text search `q` (client-side filter to avoid refetch flicker)
-- Animated actions (loader/check) via Motion; Tailwind v4 styling
 
 ---
 
@@ -185,7 +184,7 @@ curl -X POST http://localhost:4000/tasks \
   - On container start: runs `bun dist/db/migrate.js` then `bun start`
 
 - **Web image**
-  - Builds with `next build` (no Turbopack) for Bun compatibility
+  - Builds with `next build` 
   - Starts with `next start`
 
 ---
@@ -197,9 +196,6 @@ curl -X POST http://localhost:4000/tasks \
 
 - **Frontend calls return 404**
   - Ensure `NEXT_PUBLIC_API_URL` points to the API. In dev it defaults to `http://localhost:4000`.
-
-- **Next.js build fails with Bun + Turbopack SSR**
-  - Production build avoids Turbopack (`next build`). Dev still uses Turbopack.
 
 - **Port already in use**
   - Change or free ports 3000 (web) and 4000 (api), or stop conflicting processes.

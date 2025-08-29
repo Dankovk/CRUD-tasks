@@ -28,9 +28,6 @@ services:
         condition: service_healthy
     ports:
       - "4000:4000"
-    volumes:
-      - ./api:/app
-      - /app/node_modules
 
   web:
     build:
@@ -42,10 +39,7 @@ services:
       - api
     ports:
       - "3000:3000"
-    volumes:
-      - ./test-app:/app
-      - /app/node_modules
-
+    
 volumes:
   db_data:
 
